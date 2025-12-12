@@ -7,9 +7,9 @@
 import React from 'react';
 import { createStackNavigator, CardStyleInterpolators } from '@react-navigation/stack';
 import type { AppStackParamList } from '../common/types/navigation';
+import { DomainsDashboardScreen } from '../domains/screens/DomainsDashboardScreen';
 
-// Placeholder screens - will be implemented in Phases 4-7
-const DomainsDashboardScreen = () => null;
+// Temporary placeholder screens - will be implemented in later phases
 const DomainProfileScreen = () => null;
 const ShareSheetScreen = () => null;
 const QRCodeScreen = () => null;

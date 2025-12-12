@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated, type ViewStyle } from 'react-native';
+import { StyleSheet, Animated, type ViewStyle } from 'react-native';
 import { colors } from '../theme/colors';
 import { borderRadius } from '../theme/spacing';
 
@@ -67,7 +67,7 @@ export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
       style={[
         styles.base,
         {
-          width: typeof width === 'string' ? width : width as number,
+          width: width as number | `${number}%`,
           height,
           borderRadius: borderRadius[radius],
         },

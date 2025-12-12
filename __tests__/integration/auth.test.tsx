@@ -3,9 +3,6 @@
  * Tests: Splash → Welcome → Google Sign-In → Onboarding → Dashboard
  */
 
-import React from 'react';
-import { render, waitFor, fireEvent } from '@testing-library/react-native';
-
 // These imports will fail until we implement the actual components
 // That's expected for TDD - tests should fail first
 describe('Authentication Flow', () => {

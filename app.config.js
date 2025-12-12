@@ -50,6 +50,7 @@ export default {
   ],
   extra: {
     apiBaseUrl: process.env.API_BASE_URL || 'https://api.aliascore.example.com',
+    mockAuth: process.env.MOCK_AUTH === 'true',
     googleClientId: process.env.GOOGLE_CLIENT_ID,
     env: process.env.ENV || 'development'
   }

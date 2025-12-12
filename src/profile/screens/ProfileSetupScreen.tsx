@@ -13,7 +13,7 @@ import { validateDisplayName } from '../../common/utils/validators';
 import { updateProfile } from '../services/profileApi';
 import { colors } from '../../common/theme/colors';
 import { typography } from '../../common/theme/typography';
-import { spacing, borderRadius, touchTargets } from '../../common/theme/spacing';
+import { spacing, touchTargets } from '../../common/theme/spacing';
 import { logger } from '../../common/services/logger';
 
 interface ProfileSetupScreenProps {
@@ -30,7 +30,7 @@ export const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({
   submitButtonText = 'Continue',
 }) => {
   const [displayName, setDisplayName] = useState(initialDisplayName);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(initialAvatarUrl);
+  const [avatarUrl] = useState<string | null>(initialAvatarUrl);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 

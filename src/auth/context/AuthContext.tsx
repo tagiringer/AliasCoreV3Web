@@ -4,11 +4,13 @@
  */
 
 import React, { createContext, useState, useEffect, useCallback } from 'react';
+import Constants from 'expo-constants';
 import type { User } from '../../common/types/entities';
 import type { AuthContextValue, AuthState } from '../types';
 import { authenticateWithGoogle, getCurrentUser, signOut as signOutApi } from '../services/authApi';
 import { saveToken, getToken, clearToken } from '../services/tokenStorage';
 import { apiClient } from '../../common/services/apiClient';
+import { mockDataService } from '../../common/services/mock';
 import { logger } from '../../common/services/logger';
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -31,6 +33,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   useEffect(() => {
     const initializeAuth = async () => {
       try {
+        // Initialize mock data service if MOCK_AUTH=true
+        const isMockMode = Constants.expoConfig?.extra?.mockAuth === true;
+        if (isMockMode) {
+          logger.info('Initializing mock data service (MOCK_AUTH=true)');
+          await mockDataService.initialize();
+        }
+
         const token = await getToken();
 
         if (token) {

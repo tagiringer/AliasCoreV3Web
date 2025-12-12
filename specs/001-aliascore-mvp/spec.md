@@ -21,6 +21,14 @@ The experience is inspired by Snapchat: gesture-driven navigation, full-screen i
 - Q: What constraints should apply to user display names entered during onboarding? → A: 3-30 characters, alphanumeric + spaces/basic punctuation (. - ' )
 - Q: When the events map loads, how many event pins should be displayed if more than the limit exist within the 20-mile radius? → A: 25 events maximum
 
+### Session 2025-12-11
+
+- Q: Should mock authentication persist across app restarts, or reset to unauthenticated state each time? → A: Mock auth persists across app restarts (behaves like real auth)
+- Q: When using mock auth, should the app generate multiple mock domain profiles, or start with an empty state? → A: Generate 2-3 mock domain profiles (e.g., Chess, Valorant) with realistic stats
+- Q: Should there be a visual indicator in the UI when running in mock mode to distinguish from production? → A: No visual indicator (mock mode is transparent to user)
+- Q: Should mock event data be generated for the events map, or should it show empty state? → A: Generate 5-10 mock events with realistic data for each domain
+- Q: In mock mode, should users go through onboarding flow or skip directly to dashboard? → A: Skip onboarding, go directly to dashboard with pre-set mock profile
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - First-Time User Onboarding (Priority: P1)
@@ -493,6 +501,7 @@ A user wants to share their profile by tapping their phone against another user'
 - Persist authentication tokens securely (per constitution security principles)
 - Check auth status on app launch
 - If token expired, re-authenticate user (silent refresh if possible, else prompt login)
+- **Mock mode**: When mock authentication is enabled (MOCK_AUTH=true), auth tokens persist across app restarts using the same secure storage mechanism, allowing testing of returning user flows without repeated onboarding
 
 **Offline behavior**:
 - Authentication requires internet (blocking error if offline on first launch)
@@ -561,6 +570,16 @@ A user wants to share their profile by tapping their phone against another user'
 **Google OAuth flow**:
 - Assume backend handles OAuth token exchange and validation
 - Frontend receives an authentication token from backend after successful sign-in
+
+**Mock authentication for development**:
+- Mock mode (enabled via MOCK_AUTH=true environment variable) bypasses backend API calls for authentication
+- Mock auth tokens persist across app restarts to allow realistic testing of returning user flows
+- Mock authentication uses the same secure storage mechanism as production auth
+- Mock mode generates consistent mock user data (ID, display name, email) for predictable testing
+- Mock mode skips onboarding flow and navigates directly to Domains Dashboard with pre-set profile (display name, avatar)
+- Mock mode provides 2-3 pre-populated domain profiles (e.g., Chess, Valorant) with realistic stats to enable testing of dashboard and domain profile screens without backend dependency
+- Mock mode generates 5-10 mock events per domain with realistic event data (name, date/time, venue, coordinates) to enable complete testing of events map functionality
+- Mock mode operates transparently without UI indicators; developers rely on console logs to confirm mock mode is active
 
 **Avatar storage**:
 - Assume backend provides avatar upload endpoint

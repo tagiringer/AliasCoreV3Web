@@ -4,10 +4,7 @@
  */
 
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import * as Google from 'expo-auth-session/providers/google';
-import type { WelcomeScreenNavigationProp } from '../../common/types/navigation';
+import { View, StyleSheet, Alert, Platform } from 'react-native';
 import { Text } from '../../common/components/Text';
 import { Button } from '../../common/components/Button';
 import { ErrorState } from '../../common/components/ErrorState';
@@ -17,7 +14,6 @@ import { spacing } from '../../common/theme/spacing';
 import { logger } from '../../common/services/logger';
 
 export const WelcomeScreen: React.FC = () => {
-  const navigation = useNavigation<WelcomeScreenNavigationProp>();
   const { signIn } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,8 +28,17 @@ export const WelcomeScreen: React.FC = () => {
       setLoading(true);
       setError(null);
 
+      logger.info('Google Sign In initiated');
+
+      // On web, skip the alert and go straight to mock sign in
+      // Alert.alert doesn't work well on web
+      if (Platform.OS === 'web') {
+        await mockSignIn();
+        return;
+      }
+
+      // On mobile, show an alert first
       // TODO: Replace with actual Google OAuth flow using expo-auth-session
-      // For now, we'll show an alert that this needs backend configuration
       Alert.alert(
         'Google Sign In',
         'Google OAuth requires backend configuration. For MVP testing, this will be implemented once the backend is ready.',
@@ -42,19 +47,19 @@ export const WelcomeScreen: React.FC = () => {
             text: 'OK',
             onPress: () => {
               // For development, we can mock a successful sign-in
-              // mockSignIn();
+              mockSignIn();
             },
           },
         ]
       );
-
-      logger.info('Google Sign In initiated');
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to sign in';
       setError(errorMessage);
       logger.error('Google Sign In failed', { error: err });
     } finally {
-      setLoading(false);
+      if (Platform.OS === 'web') {
+        setLoading(false);
+      }
     }
   };
 

@@ -14,7 +14,7 @@ import { validateDisplayName } from '../../common/utils/validators';
 import { useAuth } from '../hooks/useAuth';
 import { colors } from '../../common/theme/colors';
 import { typography } from '../../common/theme/typography';
-import { spacing, borderRadius, touchTargets } from '../../common/theme/spacing';
+import { spacing, touchTargets } from '../../common/theme/spacing';
 import { logger } from '../../common/services/logger';
 
 export const OnboardingScreen: React.FC = () => {

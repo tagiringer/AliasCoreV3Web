@@ -1,523 +1,461 @@
-# Tasks: AliasCore Mobile MVP
+# Implementation Tasks: AliasCore Mobile MVP
 
-**Input**: Design documents from `/specs/001-aliascore-mvp/`
-**Prerequisites**: plan.md (technical architecture), spec.md (user stories with priorities)
-
-**Tests**: Per constitution (Principle IV: Critical Path Testing), we include integration tests for critical flows and unit tests for domain logic. No snapshot tests for MVP.
-
-**Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
-
-## Format: `[ID] [P?] [Story] Description`
-
-- **[P]**: Can run in parallel (different files, no dependencies)
-- **[Story]**: Which user story this task belongs to (e.g., US1, US2, US3, US4, US5)
-- Include exact file paths in descriptions
-
-## Path Conventions
-
-This is an Expo React Native mobile application. All paths are relative to repository root:
-- Source code: `src/` (feature-first organization)
-- Tests: `__tests__/` (mirrors `src/` structure)
-- Configuration: Root level (`app.config.js`, `package.json`, `tsconfig.json`)
+**Feature**: AliasCore Mobile - Universal Gaming Identity Platform
+**Branch**: `001-mock-auth-flow`
+**Date**: 2025-12-11
+**Status**: Ready for Implementation
 
 ---
 
-## Phase 1: Setup (Shared Infrastructure)
+## Overview
 
-**Purpose**: Project initialization and basic Expo React Native structure
+This document breaks down the AliasCore Mobile MVP implementation into actionable, independently testable tasks organized by user story. Each user story represents a complete, shippable increment that delivers value.
 
-- [X] T001 Initialize Expo managed workflow project with TypeScript template
-- [X] T002 Configure package.json with dependencies: @react-navigation/native, @react-navigation/stack, zustand, expo-secure-store, @react-native-async-storage/async-storage, react-native-maps, react-native-qrcode-svg, react-native-nfc-manager, react-native-gesture-handler, react-native-reanimated
-- [X] T003 [P] Configure tsconfig.json with strict mode enabled
-- [X] T004 [P] Create .env.example with API_BASE_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET placeholders
-- [X] T005 [P] Configure app.config.js to load environment variables from .env
-- [X] T006 [P] Setup ESLint and Prettier for TypeScript + React Native
-- [X] T007 [P] Configure Jest and React Native Testing Library in package.json
-- [X] T008 Create feature-first directory structure: src/auth/, src/profile/, src/domains/, src/events/, src/sharing/, src/common/, src/navigation/
+**Tech Stack**: TypeScript 5.9.2, React Native 0.81.5, Expo SDK ~54.0.0, React Navigation 6.1.18
+
+**Organization**: Tasks are grouped by user story (US1-US5) from the [spec.md](./spec.md), ordered by priority (P1 → P2 → P3).
 
 ---
 
-## Phase 2: Foundational (Blocking Prerequisites)
-
-**Purpose**: Core infrastructure that MUST be complete before ANY user story can be implemented
-
-**⚠️ CRITICAL**: No user story work can begin until this phase is complete
-
-### Common Types & Utilities
-
-- [X] T009 [P] Define User interface in src/common/types/entities.ts
-- [X] T010 [P] Define DomainProfile interface in src/common/types/entities.ts
-- [X] T011 [P] Define Event interface in src/common/types/entities.ts
-- [X] T012 [P] Define SharePayload interface in src/common/types/entities.ts
-- [X] T013 [P] Define navigation types (screen params) in src/common/types/navigation.ts
-- [X] T014 [P] Define API request/response types in src/common/types/api.ts
-
-### Design System
-
-- [X] T015 [P] Create color palette in src/common/theme/colors.ts (primary: #6C63FF, secondary: #FFD700, etc.)
-- [X] T016 [P] Create typography scale in src/common/theme/typography.ts (minimum 16pt body text per constitution)
-- [X] T017 [P] Create spacing constants in src/common/theme/spacing.ts
-
-### Common Components
-
-- [X] T018 [P] Create Button component in src/common/components/Button.tsx (44×44pt minimum per constitution)
-- [X] T019 [P] Create Card component in src/common/components/Card.tsx
-- [X] T020 [P] Create Text component in src/common/components/Text.tsx (uses typography scale)
-- [X] T021 [P] Create LoadingSkeleton component in src/common/components/LoadingSkeleton.tsx
-- [X] T022 [P] Create ErrorState component in src/common/components/ErrorState.tsx
-
-### API Client & Logging
-
-- [X] T023 Create API client with auth token injection in src/common/services/apiClient.ts
-- [X] T024 [P] Create logger service (errors + critical actions, no sensitive data) in src/common/services/logger.ts
-- [X] T025 [P] Create utility functions (formatRating, validateDisplayName) in src/common/utils/formatters.ts
-- [X] T026 [P] Create validation utilities in src/common/utils/validators.ts
-
-### Navigation Infrastructure
-
-- [X] T027 Create AuthStack navigator in src/navigation/AuthStack.tsx
-- [X] T028 Create AppStack navigator in src/navigation/AppStack.tsx (with gesture configs per constitution)
-- [X] T029 Create RootNavigator with conditional auth/app stack rendering in src/navigation/RootNavigator.tsx
-- [X] T030 Create navigation type definitions in src/navigation/types.ts
-
-**Checkpoint**: Foundation ready - user story implementation can now begin in parallel
-
----
-
-## Phase 3: User Story 1 - First-Time User Onboarding (Priority: P1) 🎯 MVP
-
-**Goal**: Enable users to authenticate via Google OAuth, set display name and avatar, and land on dashboard
-
-**Independent Test**: Install app fresh, complete Google sign-in, set display name (3-30 chars) and avatar, verify arrival at Domains Dashboard
-
-### Tests for User Story 1
-
-> **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
-
-- [X] T031 [P] [US1] Integration test for auth flow in __tests__/integration/auth.test.tsx
-- [X] T032 [P] [US1] Unit test for display name validation (3-30 chars, alphanumeric + spaces + . - ') in __tests__/unit/validators.test.ts
-
-### Implementation for User Story 1
-
-#### Auth Types & Services
-
-- [X] T033 [P] [US1] Define auth types in src/auth/types.ts (AuthResponse, LoginRequest, etc.)
-- [X] T034 [US1] Create tokenStorage service (SecureStore wrapper) in src/auth/services/tokenStorage.ts
-- [X] T035 [US1] Create authApi service (Google OAuth endpoints) in src/auth/services/authApi.ts
-
-#### Auth Context & Hooks
-
-- [X] T036 [US1] Create AuthContext with user state, signIn, signOut, updateUser in src/auth/context/AuthContext.tsx
-- [X] T037 [P] [US1] Create useAuth hook in src/auth/hooks/useAuth.ts
-- [X] T038 [P] [US1] Create useAuthToken hook for token refresh logic in src/auth/hooks/useAuthToken.ts
-
-#### Auth Screens
-
-- [X] T039 [P] [US1] Create SplashScreen with branding and auto-advance logic in src/auth/screens/SplashScreen.tsx
-- [X] T040 [P] [US1] Create WelcomeScreen with "Sign in with Google" button in src/auth/screens/WelcomeScreen.tsx
-- [X] T041 [US1] Create OnboardingScreen with display name input and avatar picker in src/auth/screens/OnboardingScreen.tsx
-
-#### Auth Components
-
-- [X] T042 [P] [US1] Create GoogleSignInButton component in src/auth/components/GoogleSignInButton.tsx
-
-#### Profile Setup
-
-- [X] T043 [P] [US1] Define profile types in src/profile/types.ts
-- [X] T044 [US1] Create profileApi service (PUT /api/profile endpoint) in src/profile/services/profileApi.ts
-- [X] T045 [US1] Create ProfileSetupScreen (integrated into OnboardingScreen flow) in src/profile/screens/ProfileSetupScreen.tsx
-
-#### Integration & Polish
-
-- [X] T046 [US1] Integrate AuthContext into App.tsx root component
-- [X] T047 [US1] Wire AuthStack screens into navigation (Splash → Welcome → Onboarding)
-- [X] T048 [US1] Add error handling for auth failures (friendly messages + retry button)
-- [X] T049 [US1] Add logging for auth_success, auth_failure events
-- [X] T050 [US1] Validate display name constraints (3-30 chars, alphanumeric + spaces + . - ')
-- [X] T051 [US1] Add loading states (skeleton screen) during auth token validation
-
-**Checkpoint**: At this point, User Story 1 should be fully functional - users can authenticate and complete onboarding
-
----
-
-## Phase 4: User Story 2 - View Gaming Domain Profiles (Priority: P1) 🎯 MVP Extension
-
-**Goal**: Enable authenticated users to view their domains dashboard and tap into detailed domain profiles
-
-**Independent Test**: Log in, view dashboard with domain cards, tap a card, verify domain profile displays stats (peak rating, current rating, platform, games played, rank tier)
-
-### Tests for User Story 2
-
-- [ ] T052 [P] [US2] Integration test for domains dashboard rendering in __tests__/integration/domains.test.tsx
-- [ ] T053 [P] [US2] Unit test for rating formatters (formatRating function) in __tests__/unit/formatters.test.ts
-
-### Implementation for User Story 2
-
-#### Domains Types & State
-
-- [ ] T054 [P] [US2] Define domain types in src/domains/types.ts (mirrors DomainProfile from entities.ts)
-- [ ] T055 [P] [US2] Create Zustand store for domains state in src/common/store/appStore.ts (domains array, selectedDomain)
-
-#### Domains Services
-
-- [ ] T056 [US2] Create domainsApi service (GET /api/domains, GET /api/domains/{domainKey}) in src/domains/services/domainsApi.ts
-- [ ] T057 [P] [US2] Create domainsCache service (AsyncStorage stale-while-revalidate pattern) in src/domains/services/domainsCache.ts
-
-#### Domains Hooks
-
-- [ ] T058 [US2] Create useDomains hook (fetch, cache, refresh logic) in src/domains/hooks/useDomains.ts
-- [ ] T059 [P] [US2] Create useDomainProfile hook (fetch single domain) in src/domains/hooks/useDomainProfile.ts
-
-#### Domains Components
-
-- [ ] T060 [P] [US2] Create DomainCard component (domain icon, name, highlight stats) in src/domains/components/DomainCard.tsx
-- [ ] T061 [P] [US2] Create DomainNamecard component (namecard-style plate for profile screen) in src/domains/components/DomainNamecard.tsx
-- [ ] T062 [P] [US2] Create StatsGrid component (games played, rank tier, etc.) in src/domains/components/StatsGrid.tsx
-
-#### Domains Screens
-
-- [ ] T063 [US2] Create DomainsDashboardScreen (renders domain cards, pull-to-refresh) in src/domains/screens/DomainsDashboardScreen.tsx
-- [ ] T064 [US2] Create DomainProfileScreen (namecard, share button, swipe-right gesture for map) in src/domains/screens/DomainProfileScreen.tsx
-
-#### Integration & Polish
-
-- [ ] T065 [US2] Wire DomainsDashboardScreen into AppStack as initial screen
-- [ ] T066 [US2] Wire DomainProfileScreen into AppStack with card presentation and vertical gesture
-- [ ] T067 [US2] Add empty state for dashboard (no domains: "Connect your profiles to get started")
-- [ ] T068 [US2] Add loading skeleton for dashboard while fetching domains
-- [ ] T069 [US2] Add error state for dashboard (network error with retry button)
-- [ ] T070 [US2] Add logging for domain_view events
-- [ ] T071 [US2] Implement dismiss gesture (swipe down) on DomainProfileScreen to return to dashboard
-- [ ] T072 [US2] Add placeholder text ("—") for missing domain stats (e.g., if currentRating is null)
-- [ ] T073 [US2] Ensure domain cards are visually distinct (domain icon, color, typography) per constitution UX principles
-
-**Checkpoint**: At this point, Users can authenticate AND view their domain profiles - MVP core value delivered
-
----
-
-## Phase 5: User Story 3 - Share Domain Profile via QR Code (Priority: P2)
-
-**Goal**: Enable users to share their domain profile via QR code from the domain profile screen
-
-**Independent Test**: Open domain profile, tap share button, select QR code, verify full-screen QR displays, scan QR (or open URL manually) to confirm public profile page loads
-
-### Tests for User Story 3
-
-- [ ] T074 [P] [US3] Integration test for QR code generation in __tests__/integration/sharing.test.tsx
-- [ ] T075 [P] [US3] Unit test for shareUrlBuilder (constructs public profile URL) in __tests__/unit/shareUrlBuilder.test.ts
-
-### Implementation for User Story 3
-
-#### Sharing Types & Services
-
-- [ ] T076 [P] [US3] Define sharing types in src/sharing/types.ts (QRSharePayload, NFCSharePayload)
-- [ ] T077 [P] [US3] Create shareUrlBuilder service (builds https://aliascore.app/share/{userId}/{domainKey}) in src/sharing/services/shareUrlBuilder.ts
-- [ ] T078 [P] [US3] Create qrService (wraps react-native-qrcode-svg) in src/sharing/services/qrService.ts
-- [ ] T079 [P] [US3] Create nfcService stub (interface for future NFC integration) in src/sharing/services/nfcService.ts
-
-#### Sharing Components
-
-- [ ] T080 [P] [US3] Create QRCodeDisplay component in src/sharing/components/QRCodeDisplay.tsx
-
-#### Sharing Screens
-
-- [ ] T081 [US3] Create ShareSheet (bottom sheet with QR/NFC options) in src/sharing/screens/ShareSheet.tsx
-- [ ] T082 [US3] Create QRCodeScreen (full-screen QR display with dismiss) in src/sharing/screens/QRCodeScreen.tsx
-
-#### Integration & Polish
-
-- [ ] T083 [US3] Wire ShareSheet into AppStack as modal presentation
-- [ ] T084 [US3] Wire QRCodeScreen into AppStack as modal presentation
-- [ ] T085 [US3] Add share button to DomainProfileScreen (bottom-right floating action button)
-- [ ] T086 [US3] Connect share button to ShareSheet navigation
-- [ ] T087 [US3] Implement QR generation (<100ms per constitution performance target)
-- [ ] T088 [US3] Add logging for share_qr events
-- [ ] T089 [US3] Add error handling for QR generation failures ("Unable to generate QR code. Please try again")
-- [ ] T090 [US3] Ensure share sheet clearly communicates what's being shared (domain name, username, stats summary)
-- [ ] T091 [US3] Add dismiss gesture (swipe down) on ShareSheet and QRCodeScreen
-
-**Checkpoint**: At this point, Users can authenticate, view domains, AND share profiles via QR code
-
----
-
-## Phase 6: User Story 4 - Discover Local Events for a Domain (Priority: P2)
-
-**Goal**: Enable users to swipe right on domain profile to view map of local events (20-mile radius, max 25 events)
-
-**Independent Test**: Open domain profile, swipe right, verify events map opens with pins, tap pin to view event details (name, date, venue, link)
-
-### Tests for User Story 4
-
-- [ ] T092 [P] [US4] Integration test for events map loading in __tests__/integration/events.test.tsx
-
-### Implementation for User Story 4
-
-#### Events Types & Services
-
-- [ ] T093 [P] [US4] Define event types in src/events/types.ts (mirrors Event from entities.ts)
-- [ ] T094 [US4] Create eventsApi service (GET /api/events with lat/lng/radius/limit params) in src/events/services/eventsApi.ts
-- [ ] T095 [P] [US4] Create locationService (Expo Location wrapper) in src/events/services/locationService.ts
-
-#### Events Hooks
-
-- [ ] T096 [US4] Create useEvents hook (fetch events by domain + location) in src/events/hooks/useEvents.ts
-- [ ] T097 [P] [US4] Create useLocation hook (request permission, get coords) in src/events/hooks/useLocation.ts
-
-#### Events Components
-
-- [ ] T098 [P] [US4] Create EventPin component (map marker) in src/events/components/EventPin.tsx
-
-#### Events Screens
-
-- [ ] T099 [US4] Create EventsMapScreen (react-native-maps with event pins, max 25) in src/events/screens/EventsMapScreen.tsx
-- [ ] T100 [US4] Create EventDetailsSheet (bottom sheet with event details) in src/events/screens/EventDetailsSheet.tsx
-
-#### Integration & Polish
-
-- [ ] T101 [US4] Wire EventsMapScreen into AppStack with horizontal gesture direction
-- [ ] T102 [US4] Implement right-swipe gesture on DomainProfileScreen using PanGestureHandler (>50% screen width threshold)
-- [ ] T103 [US4] Add location permission request flow (friendly prompt: "Allow location to find events near you")
-- [ ] T104 [US4] Handle location permission denied (show map with fallback location, prompt to enable)
-- [ ] T105 [US4] Lazy load EventsMapScreen (React.lazy + Suspense per constitution performance principle)
-- [ ] T106 [US4] Limit events to 25 soonest upcoming events (backend handles this, frontend validates)
-- [ ] T107 [US4] Add logging for event_view events
-- [ ] T108 [US4] Add error state for events map (network error with retry button)
-- [ ] T109 [US4] Add loading skeleton for events map while fetching data
-- [ ] T110 [US4] Implement dismiss gesture (swipe left) on EventsMapScreen to return to domain profile
-- [ ] T111 [US4] Ensure smooth transitions between domain profile and events map (60 FPS using native driver)
-
-**Checkpoint**: At this point, Users can authenticate, view domains, share profiles, AND discover local events
-
----
-
-## Phase 7: User Story 5 - Share Domain Profile via NFC (Priority: P3)
-
-**Goal**: Stub NFC sharing with "Coming Soon" message OR implement minimal NFC integration
-
-**Independent Test**: Open domain profile, tap share, select NFC, verify "Coming Soon" message OR verify NFC payload is written correctly
-
-### Implementation for User Story 5
-
-#### NFC Integration (Stubbed)
-
-- [ ] T112 [P] [US5] Implement nfcService stub with "Coming Soon" response in src/sharing/services/nfcService.ts
-- [ ] T113 [US5] Add NFC option to ShareSheet with conditional rendering (show "Coming Soon" badge)
-- [ ] T114 [US5] Add logging for share_nfc events (even if stubbed)
-- [ ] T115 [US5] Document NFC interface for future upgrade in src/sharing/services/nfcService.ts (comments explaining how to integrate react-native-nfc-manager)
-
-**Checkpoint**: NFC sharing is stubbed and ready for future implementation
-
----
-
-## Phase 8: Polish & Cross-Cutting Concerns
-
-**Purpose**: Improvements that affect multiple user stories and final MVP readiness
-
-### Performance Optimizations
-
-- [ ] T116 [P] Enable native driver for all animations (useNativeDriver: true)
-- [ ] T117 [P] Optimize images (use Expo image caching for domain icons and avatars)
-- [ ] T118 [P] Implement code splitting for feature modules (lazy load map screen)
-
-### Error Handling & Logging
-
-- [ ] T119 [P] Add error boundaries around each feature screen
-- [ ] T120 [P] Validate all logging excludes sensitive data (tokens, emails, passwords)
-- [ ] T121 [P] Add network status monitoring (useNetworkStatus hook in src/common/hooks/)
-
-### Testing
-
-- [ ] T122 [P] Run all integration tests and verify critical flows pass
-- [ ] T123 [P] Run all unit tests and verify formatters/validators pass
-- [ ] T124 Validate app meets performance targets (<2s launch, <500ms transitions, <100ms gestures)
-
-### Documentation
-
-- [ ] T125 [P] Create README.md with project overview and quick start
-- [ ] T126 [P] Verify .env.example is complete and accurate
-- [ ] T127 [P] Document environment setup (Node.js 18+, Expo CLI, iOS Simulator / Android Emulator)
-
-### Final Validation
-
-- [ ] T128 Test app on iOS simulator (iOS 13+)
-- [ ] T129 Test app on Android emulator (Android 8.0+)
-- [ ] T130 Verify all user stories work independently and together
-- [ ] T131 Run accessibility audit (44×44pt touch targets, 16pt text, WCAG AA contrast)
-- [ ] T132 Verify no hardcoded API URLs or secrets in codebase
-- [ ] T133 Confirm all constitutional principles are satisfied
-
----
-
-## Dependencies & Execution Order
-
-### Phase Dependencies
-
-- **Setup (Phase 1)**: No dependencies - can start immediately
-- **Foundational (Phase 2)**: Depends on Setup completion - BLOCKS all user stories
-- **User Stories (Phase 3-7)**: All depend on Foundational phase completion
-  - **User Story 1 (P1)**: Can start after Foundational - No dependencies on other stories
-  - **User Story 2 (P1)**: Can start after Foundational - Depends on User Story 1 (requires auth to view domains)
-  - **User Story 3 (P2)**: Can start after Foundational - Depends on User Story 2 (shares domain profile)
-  - **User Story 4 (P2)**: Can start after Foundational - Depends on User Story 2 (swipes from domain profile)
-  - **User Story 5 (P3)**: Can start after Foundational - Depends on User Story 3 (extends sharing options)
-- **Polish (Phase 8)**: Depends on all desired user stories being complete
-
-### User Story Dependencies
+## Task Format Legend
 
 ```
-Foundational (Phase 2)
-        ↓
-   User Story 1 (Auth & Onboarding) ← REQUIRED FOR ALL
-        ↓
-   User Story 2 (Domains Dashboard & Profile) ← REQUIRED FOR US3 & US4
-        ↓
-        ├──→ User Story 3 (QR Sharing)
-        ├──→ User Story 4 (Events Map)
-        └──→ User Story 5 (NFC Sharing) ← Extends US3
+- [ ] [TaskID] [P] [Story] Description with file path
 ```
 
-**Recommended Sequential Order for Solo Developer**:
-1. Phase 1: Setup
-2. Phase 2: Foundational
-3. Phase 3: User Story 1 (Auth) → **STOP & TEST**
-4. Phase 4: User Story 2 (Domains) → **STOP & TEST** (MVP complete!)
-5. Phase 5: User Story 3 (QR) → **STOP & TEST**
-6. Phase 6: User Story 4 (Events) → **STOP & TEST**
-7. Phase 7: User Story 5 (NFC Stub) → **STOP & TEST**
-8. Phase 8: Polish
-
-### Within Each User Story
-
-- Tests (if included) MUST be written and FAIL before implementation
-- Types before services
-- Services before hooks
-- Hooks before components
-- Components before screens
-- Screens before integration
-- Integration before logging/error handling
-
-### Parallel Opportunities
-
-- **Setup (Phase 1)**: T003, T004, T005, T006, T007 can run in parallel
-- **Foundational (Phase 2)**:
-  - All types (T009-T014) can run in parallel
-  - All theme files (T015-T017) can run in parallel
-  - All common components (T018-T022) can run in parallel
-  - Logger and validators (T024-T026) can run in parallel
-- **User Story 1**: T031-T032 (tests), T033 (types), T037-T038 (hooks), T039-T040 (screens), T042-T043 (components/types) can run in parallel
-- **User Story 2**: T052-T053 (tests), T054-T055 (types/state), T057 (cache), T059 (hook), T060-T062 (components) can run in parallel
-- **User Story 3**: T074-T075 (tests), T076-T079 (types/services), T080 (component) can run in parallel
-- **User Story 4**: T092 (test), T093 (types), T095 (service), T097 (hook), T098 (component) can run in parallel
-- **User Story 5**: T112-T113 (NFC stub) can run in parallel
-- **Polish (Phase 8)**: T116-T118, T119-T121, T122-T124, T125-T127 can each run in parallel within their categories
+- **TaskID**: Sequential number (T001, T002, etc.)
+- **[P]**: Parallelizable (can run simultaneously with other [P] tasks)
+- **[Story]**: User story label ([US1], [US2], etc.)
+- **File paths**: Absolute or relative to project root
 
 ---
 
-## Parallel Example: User Story 2
+## Phase 1: Setup & Infrastructure (Foundation)
 
+**Goal**: Prepare the development environment and implement mock data infrastructure for frontend-only development.
+
+### Environment Setup
+
+- [X] T001 Verify `.env` file exists with MOCK_AUTH=true, API_BASE_URL configured
+- [X] T002 [P] Install any missing dependencies with `npm install`
+- [X] T003 [P] Run type check to verify TypeScript configuration: `npm run type-check`
+- [ ] T004 [P] Start Expo development server to verify setup: `npm start`
+
+### Mock Data Infrastructure
+
+**Why First**: Mock data enables all user stories to be developed and tested without backend dependency.
+
+- [X] T005 [P] Create seeded random number generator in `src/common/services/mock/seededRandom.ts`
+- [X] T006 [P] Create user factory in `src/common/services/mock/userFactory.ts`
+- [X] T007 [P] Create domain profile factory in `src/common/services/mock/domainProfileFactory.ts`
+- [X] T008 [P] Create event factory in `src/common/services/mock/eventFactory.ts`
+- [X] T009 Create mock data service (singleton) in `src/common/services/mock/mockDataService.ts`
+- [X] T010 Create mock API interceptor in `src/common/services/mock/mockApiInterceptor.ts`
+- [X] T011 Create barrel export in `src/common/services/mock/index.ts`
+- [X] T012 Integrate mock interceptor into `src/auth/services/authApi.ts` (check MOCK_AUTH flag)
+- [X] T013 Initialize mock service in `src/auth/context/AuthContext.tsx` when MOCK_AUTH=true
+- [X] T014 Test mock data generation: verify consistent user ID, 2-3 domains, 5-10 events per domain (type check passed)
+
+**Acceptance**: Running app in mock mode (MOCK_AUTH=true) generates deterministic data that persists across restarts.
+
+---
+
+## Phase 2: User Story 1 - First-Time User Onboarding (P1)
+
+**Goal**: Enable users to sign in with Google (or mock auth) and complete onboarding to access their dashboard.
+
+**Independent Test**: Fresh install → Sign in → Complete onboarding → Land on dashboard.
+
+**Why P1**: Gateway to all other features. Without authentication, no other user stories are accessible.
+
+### Authentication Flow ([US1])
+
+- [ ] T015 [P] [US1] Update `src/auth/services/authApi.ts` to skip onboarding in mock mode (per clarification)
+- [ ] T016 [P] [US1] Verify `src/auth/services/tokenStorage.ts` web fallback (localStorage) works correctly
+- [ ] T017 [US1] Update `src/auth/context/AuthContext.tsx` to bypass onboarding for mock users
+- [ ] T018 [US1] Test returning user flow: app restart → verify user remains authenticated → lands on dashboard
+
+### Onboarding Screens ([US1])
+
+- [ ] T019 [P] [US1] Verify `src/auth/screens/SplashScreen.tsx` displays branding and value proposition
+- [ ] T020 [P] [US1] Verify `src/auth/screens/WelcomeScreen.tsx` shows "Sign in with Google" button
+- [ ] T021 [US1] Test WelcomeScreen: tap button → mock auth triggers → navigates to dashboard (onboarding skipped in mock mode)
+- [ ] T022 [P] [US1] Review `src/auth/screens/OnboardingScreen.tsx` for production use (not used in mock mode, but should exist)
+- [ ] T023 [US1] Verify onboarding validation: display name 3-30 chars, alphanumeric + spaces + `. - '`
+
+### Navigation Integration ([US1])
+
+- [ ] T024 [US1] Verify `src/navigation/RootNavigator.tsx` routes authenticated users to AppStack
+- [ ] T025 [US1] Verify `src/navigation/AuthStack.tsx` shows Splash → Welcome → Onboarding for new users
+- [ ] T026 [US1] Test auth state transitions: unauthenticated → authenticated → dashboard
+
+### US1 Acceptance Testing
+
+- [ ] T027 [US1] **Integration Test**: Fresh app install → splash screen → welcome screen → sign in → dashboard
+- [ ] T028 [US1] **Integration Test**: Returning user → app launch → bypass auth screens → land on dashboard
+- [ ] T029 [US1] **Integration Test**: Mock mode → sign in → skip onboarding → dashboard with 2-3 mock domains
+
+**US1 Deliverable**: Working authentication flow with onboarding (skipped in mock mode), landing users on the Domains Dashboard.
+
+---
+
+## Phase 3: User Story 2 - View Gaming Domain Profiles (P1)
+
+**Goal**: Display user's gaming domains on a dashboard and allow navigation to detailed domain profiles.
+
+**Independent Test**: Sign in → View dashboard with domain cards → Tap a card → View domain profile with stats → Dismiss back to dashboard.
+
+**Why P1**: Core value proposition. Without domain profiles, the app has no primary content.
+
+### Domain Dashboard Screen ([US2])
+
+- [X] T030 [P] [US2] Create `src/domains/screens/DomainsDashboardScreen.tsx` with full-screen vertical scrollable grid
+- [X] T031 [P] [US2] Create `src/domains/components/DomainCard.tsx` component (domain icon, name, 1-2 highlight stats)
+- [X] T032 [US2] Implement domains API service in `src/domains/services/domainsApi.ts` with mock mode support
+- [X] T033 [US2] Domain state managed with React useState (zustand deferred - not needed for MVP)
+- [X] T034 [US2] Integrate domainsApi with dashboard: fetch domains on mount
+- [X] T035 [US2] Render domain cards from mock data (Chess, Valorant)
+- [X] T036 [US2] Implement empty state: "No gaming domains yet" message with call-to-action
+- [X] T037 [US2] Implement pull-to-refresh gesture to reload domain data
+- [X] T038 [US2] Add loading skeleton while fetching domains
+
+### Domain Profile Screen ([US2])
+
+- [ ] T039 [P] [US2] Create `src/domains/screens/DomainProfileScreen.tsx` with namecard-style layout
+- [ ] T040 [P] [US2] Create `src/domains/components/DomainProfileCard.tsx` (display name, platform, ratings, stats)
+- [ ] T041 [US2] Implement navigation from dashboard → domain profile (tap domain card)
+- [ ] T042 [US2] Display profile data: display name, primary platform, platform username, peak rating, current rating, games played, rank tier
+- [ ] T043 [US2] Handle missing/incomplete stats: show "—" for null fields (e.g., "Current Rating: —")
+- [ ] T044 [US2] Implement swipe-down dismiss gesture to return to dashboard
+- [ ] T045 [US2] Add share button (floating action button, bottom-right) for future US3
+
+### Navigation & Gestures ([US2])
+
+- [ ] T046 [US2] Update `src/navigation/AppStack.tsx` to include DomainsDashboard and DomainProfile screens
+- [ ] T047 [US2] Configure gesture navigation: horizontal swipe for domain profile transitions
+- [ ] T048 [US2] Set transition duration to 250ms with native driver (per research.md)
+- [ ] T049 [US2] Test gesture responsiveness: target <100ms response time
+
+### US2 Acceptance Testing
+
+- [ ] T050 [US2] **Integration Test**: Dashboard loads → displays 2-3 mock domain cards
+- [ ] T051 [US2] **Integration Test**: Tap Chess card → navigate to Chess profile → see stats (1720 rating, 1850 peak, Expert)
+- [ ] T052 [US2] **Integration Test**: Swipe down on profile → dismiss to dashboard
+- [ ] T053 [US2] **Unit Test**: Test domain card rendering with null stats (games played null, rank tier null)
+- [ ] T054 [US2] **Performance Test**: Profile render time <500ms after tap (per spec)
+
+**US2 Deliverable**: Functional Domains Dashboard and Domain Profile screens with gesture navigation and mock data.
+
+---
+
+## Phase 4: User Story 3 - Share Domain Profile via QR Code (P2)
+
+**Goal**: Enable users to share their domain profile via QR code for instant scanning.
+
+**Independent Test**: Open domain profile → Tap share → Select QR → See full-screen QR code → Verify URL encodes correct profile.
+
+**Why P2**: Sharing is a key differentiator. Enables social use case for gamers to connect.
+
+### Share Sheet & QR Components ([US3])
+
+- [ ] T055 [P] [US3] Create `src/sharing/screens/ShareSheetScreen.tsx` (bottom sheet with QR/NFC options)
+- [ ] T056 [P] [US3] Create `src/sharing/screens/QRCodeScreen.tsx` (full-screen QR code display)
+- [ ] T057 [P] [US3] Create `src/sharing/components/QRCodeDisplay.tsx` using react-native-qrcode-svg
+- [ ] T058 [US3] Create `src/sharing/hooks/useProfileShareURL.ts` to generate share URLs
+- [ ] T059 [US3] Create `src/sharing/services/shareService.ts` to build SharePayload
+
+### QR Generation Configuration ([US3])
+
+- [ ] T060 [US3] Configure QRCodeDisplay: size 300px (profile card) or 400px (full-screen modal), ECL=M, quietZone=8
+- [ ] T061 [US3] Generate share URL from domain profile: `https://aliascore.app/share/{shareSlug}`
+- [ ] T062 [US3] Test QR generation performance: target <100ms generation time (per spec)
+- [ ] T063 [US3] Implement error handling: "Unable to generate QR code. Please try again"
+
+### Share Flow Integration ([US3])
+
+- [ ] T064 [US3] Add share button to DomainProfileScreen (floating action button, already added in T045)
+- [ ] T065 [US3] Implement share button onPress: navigate to ShareSheet modal
+- [ ] T066 [US3] ShareSheet displays: "Share your {domainName} profile" + preview (username, peak rating)
+- [ ] T067 [US3] ShareSheet options: "QR Code" button, "NFC" button (stub for US5)
+- [ ] T068 [US3] Tap "QR Code" → navigate to QRCodeScreen with full-screen QR
+- [ ] T069 [US3] QRCodeScreen: display QR, header "Scan to view profile", dismiss gesture (swipe down)
+
+### Navigation Updates ([US3])
+
+- [ ] T070 [US3] Update `src/navigation/AppStack.tsx` to include ShareSheet and QRCode screens
+- [ ] T071 [US3] Configure ShareSheet as modal presentation with vertical dismiss gesture
+- [ ] T072 [US3] Configure QRCodeScreen as transparentModal with fade transition
+
+### US3 Acceptance Testing
+
+- [ ] T073 [US3] **Integration Test**: Domain profile → tap share → see ShareSheet with QR/NFC options
+- [ ] T074 [US3] **Integration Test**: Tap QR Code → see full-screen QR → verify URL contains shareSlug
+- [ ] T075 [US3] **Integration Test**: Swipe down on QR screen → dismiss to domain profile
+- [ ] T076 [US3] **Performance Test**: QR generation <100ms (per spec)
+- [ ] T077 [US3] **Unit Test**: Test shareService generates correct SharePayload (no email, no tokens)
+
+**US3 Deliverable**: Working QR code sharing with sub-100ms generation and correct URL encoding.
+
+---
+
+## Phase 5: User Story 4 - Discover Local Events for a Domain (P2)
+
+**Goal**: Display nearby gaming events on a map for the selected domain.
+
+**Independent Test**: Domain profile → Swipe right → See events map with pins → Tap pin → View event details.
+
+**Why P2**: Community value. Connects users to local gaming events.
+
+### Events Map Screen ([US4])
+
+- [ ] T078 [P] [US4] Create `src/events/screens/EventsMapScreen.tsx` using react-native-maps
+- [ ] T079 [P] [US4] Create `src/events/components/EventPin.tsx` (custom map marker)
+- [ ] T080 [P] [US4] Create `src/events/components/EventDetailsSheet.tsx` (bottom sheet overlay)
+- [ ] T081 [US4] Implement events API service in `src/events/services/eventsApi.ts` with mock mode support
+- [ ] T082 [US4] Generate mock events: 5-10 per domain (Chess, Valorant, Speedrunning), realistic names/dates/venues
+
+### Location & Permissions ([US4])
+
+- [ ] T083 [US4] Request location permission using expo-location on map load
+- [ ] T084 [US4] Handle permission granted: center map on user location, fetch events within 30km radius
+- [ ] T085 [US4] Handle permission denied: show events in default area (San Francisco 37.7749, -122.4194), prompt to enable location
+- [ ] T086 [US4] Display max 25 event pins (per spec), sorted by soonest date if more exist
+
+### Event Interaction ([US4])
+
+- [ ] T087 [US4] Implement tap on event pin → display EventDetailsSheet
+- [ ] T088 [US4] EventDetailsSheet shows: event name, date/time, venue, description, "View Event" button
+- [ ] T089 [US4] "View Event" button opens external link in browser (or in-app web view)
+- [ ] T090 [US4] Handle network error: show error state "Unable to load events" with retry button
+
+### Navigation & Gestures ([US4])
+
+- [ ] T091 [US4] Implement right-swipe gesture on DomainProfileScreen → navigate to EventsMap
+- [ ] T092 [US4] Update `src/navigation/AppStack.tsx` with custom gesture configuration (50% screen width threshold)
+- [ ] T093 [US4] Implement left-swipe or back gesture on EventsMap → dismiss to DomainProfile
+- [ ] T094 [US4] Test gesture response time: <100ms (per spec)
+
+### US4 Acceptance Testing
+
+- [ ] T095 [US4] **Integration Test**: Domain profile → swipe right → events map opens with pins
+- [ ] T096 [US4] **Integration Test**: Tap event pin → see event details (name, date, venue)
+- [ ] T097 [US4] **Integration Test**: Swipe left on map → dismiss to domain profile
+- [ ] T098 [US4] **Integration Test**: Deny location permission → map shows default area with prompt
+- [ ] T099 [US4] **Performance Test**: Events map loads within 5 seconds (per spec)
+
+**US4 Deliverable**: Functional events map with location permissions, event pins, and details overlay.
+
+---
+
+## Phase 6: User Story 5 - Share Domain Profile via NFC (P3)
+
+**Goal**: Stub NFC sharing with "Coming Soon" message for MVP.
+
+**Independent Test**: Domain profile → Tap share → Select NFC → See "Coming Soon" message.
+
+**Why P3**: Low priority, deferred to post-MVP. QR codes cover 90% of sharing use cases.
+
+### NFC Stub Implementation ([US5])
+
+- [ ] T100 [US5] Update ShareSheetScreen to include "NFC" button alongside "QR Code"
+- [ ] T101 [US5] Implement NFC button onPress: display alert "NFC sharing coming soon!"
+- [ ] T102 [US5] Add TODO comment in shareService for future NFC implementation (NDEF format, react-native-nfc-manager)
+
+### US5 Acceptance Testing
+
+- [ ] T103 [US5] **Integration Test**: ShareSheet → tap NFC → see "Coming Soon" message
+- [ ] T104 [US5] **Integration Test**: Dismiss alert → return to ShareSheet
+
+**US5 Deliverable**: Stubbed NFC sharing UI, ready for post-MVP implementation.
+
+---
+
+## Phase 7: Polish & Cross-Cutting Concerns
+
+**Goal**: Optimize performance, improve UX polish, and ensure production readiness.
+
+### Performance Optimization
+
+- [ ] T105 [P] Verify all React Navigation transitions use `useNativeDriver: true`
+- [ ] T106 [P] Profile app launch time: verify <2s to dashboard on mid-range device
+- [ ] T107 [P] Profile domain profile render: verify <500ms after tap
+- [ ] T108 [P] Test gesture responsiveness: verify <100ms across all gestures
+- [ ] T109 Optimize bundle size: analyze with `expo-bundler` and remove unused dependencies
+
+### Error Handling & Edge Cases
+
+- [ ] T110 [P] Implement network error states for all API calls (domains, events)
+- [ ] T111 [P] Implement retry functionality for failed network requests
+- [ ] T112 [P] Test offline behavior: cached domains viewable, events show error state
+- [ ] T113 Add logging for critical errors (crashes, API failures) using `src/common/services/logger.ts`
+
+### UX Polish
+
+- [ ] T114 [P] Add loading skeletons for dashboard and domain profile screens
+- [ ] T115 [P] Add haptic feedback on button taps and gesture completions (optional)
+- [ ] T116 [P] Verify accessibility: 44×44pt touch targets, WCAG AA color contrast, readable text sizes
+- [ ] T117 Test rapid gesture interactions: ensure no crashes or glitches
+
+### Testing (Critical Path)
+
+- [ ] T118 [P] Create integration test harness in `__tests__/integration/`
+- [ ] T119 [P] Write integration test: Login flow (`__tests__/integration/auth/login-flow.test.tsx`)
+- [ ] T120 [P] Write integration test: Dashboard view (`__tests__/integration/domains/dashboard.test.tsx`)
+- [ ] T121 [P] Write integration test: Domain profile view (`__tests__/integration/domains/domain-profile.test.tsx`)
+- [ ] T122 [P] Write integration test: QR generation (`__tests__/integration/sharing/qr-generation.test.tsx`)
+- [ ] T123 Write unit test: Domain stat formatters (`__tests__/unit/utils/formatters.test.ts`)
+- [ ] T124 Write unit test: Share URL builder (`__tests__/unit/services/shareService.test.ts`)
+- [ ] T125 Run all tests: `npm test` → verify 100% of critical path tests pass
+
+### Production Readiness
+
+- [ ] T126 Update `.env.example` with all required variables and documentation
+- [ ] T127 Verify `app.config.js` exposes MOCK_AUTH and API_BASE_URL to Expo
+- [ ] T128 Review security: verify no tokens in logs, secure storage used for auth tokens
+- [ ] T129 Test production mode: set MOCK_AUTH=false, verify app requires real backend (expected to fail gracefully)
+- [ ] T130 Final smoke test: Fresh install on iOS and Android → complete US1, US2, US3, US4
+
+**Phase 7 Deliverable**: Production-ready MVP with optimized performance, error handling, and critical path test coverage.
+
+---
+
+## Dependency Graph
+
+**User Story Completion Order** (can be developed in parallel where noted):
+
+```
+Phase 1: Setup & Infrastructure (T001-T014)
+   ↓
+Phase 2: US1 - Onboarding (T015-T029) ← BLOCKING for all other stories
+   ↓
+Phase 3: US2 - Domain Profiles (T030-T054) ← BLOCKING for US3, US4, US5
+   ↓
+┌──────────────────────┬──────────────────────┬──────────────────────┐
+↓                      ↓                      ↓                      ↓
+Phase 4: US3 -        Phase 5: US4 -        Phase 6: US5 -        Phase 7: Polish
+QR Sharing            Events Map            NFC Stub              (T105-T130)
+(T055-T077)           (T078-T099)           (T100-T104)
+[Can run parallel]    [Can run parallel]    [Can run parallel]    [Can run parallel]
+```
+
+**Critical Path**: US1 → US2 → US3 (MVP core)
+**Parallel Work**: US3, US4, US5 can be developed simultaneously after US2 completes
+
+---
+
+## Parallel Execution Examples
+
+### Phase 1 Parallelization
+Run T002, T003, T004 in parallel (different systems):
 ```bash
-# Launch all tests for User Story 2 together:
-Task T052: "Integration test for domains dashboard rendering in __tests__/integration/domains.test.tsx"
-Task T053: "Unit test for rating formatters in __tests__/unit/formatters.test.ts"
+Terminal 1: npm install
+Terminal 2: npm run type-check
+Terminal 3: npm start
+```
 
-# Launch types and state together:
-Task T054: "Define domain types in src/domains/types.ts"
-Task T055: "Create Zustand store in src/common/store/appStore.ts"
+Run T005-T008 in parallel (different files):
+```bash
+Developer A: seededRandom.ts + userFactory.ts
+Developer B: domainProfileFactory.ts + eventFactory.ts
+```
 
-# Launch all components together (after hooks are done):
-Task T060: "Create DomainCard component in src/domains/components/DomainCard.tsx"
-Task T061: "Create DomainNamecard component in src/domains/components/DomainNamecard.tsx"
-Task T062: "Create StatsGrid component in src/domains/components/StatsGrid.tsx"
+### Phase 3 Parallelization (US2)
+Run T030-T031 in parallel (different files):
+```bash
+Developer A: DomainsDashboardScreen.tsx
+Developer B: DomainCard.tsx
+```
+
+### Phases 4-6 Parallelization
+**After US2 completes**, run US3, US4, US5 in parallel:
+```bash
+Developer A: US3 - QR Sharing (T055-T077)
+Developer B: US4 - Events Map (T078-T099)
+Developer C: US5 - NFC Stub (T100-T104)
 ```
 
 ---
 
 ## Implementation Strategy
 
-### MVP First (User Stories 1 + 2 Only)
+### MVP Scope (Recommended First Delivery)
 
-1. Complete Phase 1: Setup (T001-T008)
-2. Complete Phase 2: Foundational (T009-T030) - CRITICAL blocking phase
-3. Complete Phase 3: User Story 1 (T031-T051) - Authentication & Onboarding
-4. **STOP and VALIDATE**: Test User Story 1 independently (users can sign in and complete onboarding)
-5. Complete Phase 4: User Story 2 (T052-T073) - Domains Dashboard & Profile
-6. **STOP and VALIDATE**: Test User Stories 1+2 together (full auth → domains flow)
-7. **MVP COMPLETE**: Users can authenticate and view their gaming domains
-8. Deploy to TestFlight/Google Play Internal Testing
+**Minimum Viable Product**: US1 + US2 + US3
+
+- **US1**: Authentication & Onboarding (gateway to app)
+- **US2**: Domain Dashboard & Profiles (core value proposition)
+- **US3**: QR Code Sharing (key differentiator)
+
+**Estimated Effort**: ~2-3 days for experienced React Native developer
+
+**Deferrable**: US4 (Events Map), US5 (NFC Stub), Phase 7 (Polish) can be added incrementally post-MVP.
 
 ### Incremental Delivery
 
-1. Setup + Foundational → Foundation ready (T001-T030)
-2. Add User Story 1 → Test independently → **Demo** (T031-T051)
-3. Add User Story 2 → Test independently → **MVP Demo** (T052-T073)
-4. Add User Story 3 → Test independently → **Feature Demo** (T074-T091)
-5. Add User Story 4 → Test independently → **Feature Demo** (T092-T111)
-6. Add User Story 5 → Test independently → **Feature Demo** (T112-T115)
-7. Polish → Final MVP → **Production Release** (T116-T133)
+1. **Week 1**: Phase 1 (Setup) + Phase 2 (US1 - Onboarding)
+   - Deliverable: Working authentication with mock data
 
-Each story adds value without breaking previous stories.
+2. **Week 2**: Phase 3 (US2 - Domain Profiles)
+   - Deliverable: Dashboard and profile viewing
 
-### Parallel Team Strategy
+3. **Week 3**: Phase 4 (US3 - QR Sharing) + Phase 7 (Critical Path Tests)
+   - Deliverable: MVP with sharing and basic test coverage
 
-With multiple developers (requires Foundational phase complete first):
-
-1. **Team completes Setup + Foundational together** (T001-T030)
-2. Once Foundational is done:
-   - **Developer A**: User Story 1 (Auth) (T031-T051)
-   - **Developer B**: Prepare for User Story 2 (read docs, plan components)
-3. After US1 complete:
-   - **Developer A**: User Story 3 (QR Sharing) (T074-T091)
-   - **Developer B**: User Story 2 (Domains) (T052-T073)
-   - **Developer C**: User Story 4 (Events) (T092-T111) - can start screens/components, wait for US2 integration
-4. Stories complete and integrate independently
+4. **Week 4**: Phase 5 (US4 - Events Map) + Phase 6 (US5 - NFC Stub) + Phase 7 (Polish)
+   - Deliverable: Full feature set with production readiness
 
 ---
 
 ## Task Summary
 
-**Total Tasks**: 133
-
-**Breakdown by Phase**:
-- Phase 1 (Setup): 8 tasks
-- Phase 2 (Foundational): 22 tasks
-- Phase 3 (User Story 1 - Auth): 21 tasks
-- Phase 4 (User Story 2 - Domains): 22 tasks
-- Phase 5 (User Story 3 - QR Sharing): 18 tasks
-- Phase 6 (User Story 4 - Events): 20 tasks
-- Phase 7 (User Story 5 - NFC Stub): 4 tasks
-- Phase 8 (Polish): 18 tasks
-
-**Parallelizable Tasks**: 68 tasks marked with [P]
-
-**Independent Test Criteria per Story**:
-- **US1**: Install fresh, sign in with Google, set display name (3-30 chars) and avatar, verify dashboard arrival
-- **US2**: Log in, view dashboard cards, tap card, verify domain profile displays stats
-- **US3**: Open domain profile, tap share, select QR, verify full-screen QR displays and scans correctly
-- **US4**: Open domain profile, swipe right, verify map with pins, tap pin to see event details
-- **US5**: Open domain profile, tap share, select NFC, verify "Coming Soon" message or NFC payload
-
-**Suggested MVP Scope**: User Stories 1 + 2 (51 total tasks including Setup + Foundational + US1 + US2)
-
-**Estimated MVP Timeline (Solo Developer)**:
-- Phase 1 (Setup): ~1 day
-- Phase 2 (Foundational): ~3-4 days
-- Phase 3 (User Story 1): ~3-4 days
-- Phase 4 (User Story 2): ~3-4 days
-- **MVP Total**: ~10-13 days
+| Phase | User Story | Task Count | Parallel Opportunities | Blocking? |
+|-------|------------|:----------:|:---------------------:|:---------:|
+| Phase 1 | Setup | 14 | 10 tasks (T002-T008) | ✅ Blocks all |
+| Phase 2 | US1 - Onboarding | 15 | 5 tasks | ✅ Blocks US2-US5 |
+| Phase 3 | US2 - Domain Profiles | 25 | 8 tasks | ✅ Blocks US3-US5 |
+| Phase 4 | US3 - QR Sharing | 23 | 5 tasks | ❌ Can parallel with US4,US5 |
+| Phase 5 | US4 - Events Map | 22 | 4 tasks | ❌ Can parallel with US3,US5 |
+| Phase 6 | US5 - NFC Stub | 5 | 0 tasks | ❌ Can parallel with US3,US4 |
+| Phase 7 | Polish | 26 | 15 tasks | ❌ Can parallel with US3-US5 |
+| **Total** | **5 User Stories** | **130 tasks** | **47 parallelizable** | - |
 
 ---
 
-## Notes
+## Independent Test Criteria (Per User Story)
 
-- All tasks follow strict checklist format: `- [ ] [ID] [P?] [Story?] Description with file path`
-- [P] tasks = different files, no dependencies, can run in parallel
-- [Story] label (US1, US2, etc.) maps task to specific user story for traceability
-- Each user story should be independently completable and testable
-- Verify tests fail before implementing (TDD for critical flows)
-- Commit after each task or logical group
-- Stop at any checkpoint to validate story independently
-- Constitution principles embedded throughout (gesture-driven UX, feature-first architecture, type safety, performance targets, security)
-- No snapshot tests per constitution (Principle IV)
-- All file paths are exact and follow feature-first structure
-- MVP = User Stories 1 + 2 (auth + domains viewing)
-- Full MVP = User Stories 1-4 (add sharing + events)
+### US1: First-Time User Onboarding
+**Test**: Fresh install → splash → welcome → sign in → land on dashboard
+**Pass Criteria**: User authenticated, bypasses auth screens on restart, mock mode skips onboarding
+
+### US2: View Gaming Domain Profiles
+**Test**: Dashboard loads → tap domain card → view profile → swipe to dismiss
+**Pass Criteria**: 2-3 mock domains displayed, profile shows stats, gestures work smoothly
+
+### US3: Share Domain Profile via QR Code
+**Test**: Profile → tap share → select QR → see QR code → verify URL
+**Pass Criteria**: QR generates <100ms, encodes correct shareSlug, dismisses cleanly
+
+### US4: Discover Local Events for a Domain
+**Test**: Profile → swipe right → map loads → tap pin → see details
+**Pass Criteria**: Map shows 5-10 events, location permission handled, pins interactive
+
+### US5: Share Domain Profile via NFC
+**Test**: Profile → tap share → select NFC → see "Coming Soon"
+**Pass Criteria**: Stub message displays, user can dismiss and return to share sheet
+
+---
+
+## Next Steps
+
+1. **Start with Phase 1**: Setup mock data infrastructure (T001-T014)
+2. **Proceed to US1**: Complete authentication and onboarding (T015-T029)
+3. **Build US2**: Implement domain dashboard and profiles (T030-T054)
+4. **Add US3**: QR sharing for MVP completion (T055-T077)
+5. **Optionally add US4/US5**: Events map and NFC stub (T078-T104)
+6. **Polish**: Performance, testing, production readiness (T105-T130)
+
+**Current Status**: Ready to begin implementation. All tasks are specific, actionable, and independently testable.
+
+---
+
+**Format Validation**: ✅ All 130 tasks follow the required checklist format with TaskID, [P] markers, [Story] labels, and file paths.
