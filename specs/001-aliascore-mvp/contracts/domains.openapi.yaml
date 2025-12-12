@@ -1,0 +1,199 @@
+openapi: 3.0.3
+info:
+  title: AliasCore Mobile - Domains API
+  description: |
+    Domain profile endpoints for AliasCore Mobile MVP.
+    Retrieves user's gaming domain profiles (Chess, Valorant, etc.) with stats and ratings.
+  version: 1.0.0
+
+servers:
+  - url: https://api.aliascore.example.com
+    description: Production API
+  - url: http://localhost:3000
+    description: Local development
+
+paths:
+  /api/domains:
+    get:
+      summary: Get all domain profiles for current user
+      description: |
+        Retrieves all gaming domain profiles for the authenticated user.
+        Returns array of domain profiles with stats, ratings, and platform info.
+      operationId: getUserDomains
+      tags:
+        - Domains
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Domain profiles retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - domains
+                properties:
+                  domains:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DomainProfile'
+                    description: Array of user's domain profiles (max 10)
+        '401':
+          description: Unauthorized (missing or invalid auth token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/domains/{domainId}:
+    get:
+      summary: Get specific domain profile by ID
+      description: |
+        Retrieves a single domain profile by its unique identifier.
+        Returns detailed stats and platform information for the domain.
+      operationId: getDomainById
+      tags:
+        - Domains
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: domainId
+          in: path
+          required: true
+          description: Unique identifier for the domain profile
+          schema:
+            type: string
+          example: "dom_chess_001"
+      responses:
+        '200':
+          description: Domain profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DomainProfile'
+        '401':
+          description: Unauthorized (missing or invalid auth token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Domain profile not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    DomainProfile:
+      type: object
+      required:
+        - id
+        - userId
+        - domainKey
+        - domainName
+        - domainIcon
+        - primaryPlatform
+        - platformUsername
+        - shareSlug
+        - lastUpdated
+      properties:
+        id:
+          type: string
+          description: Domain profile unique identifier
+          example: "dom_chess_001"
+        userId:
+          type: string
+          description: ID of the user who owns this profile
+          example: "usr_abc123"
+        domainKey:
+          type: string
+          pattern: '^[a-z0-9_-]+$'
+          description: Unique slug for the domain (lowercase alphanumeric)
+          example: "chess"
+        domainName:
+          type: string
+          description: Human-readable domain name
+          example: "Chess"
+        domainIcon:
+          type: string
+          format: uri
+          description: URL or asset path to domain icon image
+          example: "https://cdn.aliascore.app/icons/chess.png"
+        primaryPlatform:
+          type: string
+          description: Primary platform for this domain
+          example: "Chess.com"
+        platformUsername:
+          type: string
+          minLength: 1
+          description: User's username on the primary platform
+          example: "ChessMaster2000"
+        peakRating:
+          type: number
+          nullable: true
+          description: Highest rating achieved by the user
+          example: 2400
+        currentRating:
+          type: number
+          nullable: true
+          description: User's current rating
+          example: 2350
+        gamesPlayed:
+          type: integer
+          nullable: true
+          minimum: 0
+          description: Total games played in this domain
+          example: 1234
+        rankTier:
+          type: string
+          nullable: true
+          description: Rank or tier name (e.g., Diamond, Master)
+          example: "Expert"
+        shareSlug:
+          type: string
+          description: Unique slug for public share URLs
+          example: "usr_abc123_chess"
+        lastUpdated:
+          type: string
+          format: date-time
+          description: Timestamp of last stats sync from platform (ISO 8601)
+          example: "2025-12-11T14:00:00Z"
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              example: "NOT_FOUND"
+            message:
+              type: string
+              example: "Domain profile not found"

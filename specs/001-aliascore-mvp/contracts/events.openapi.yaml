@@ -1,0 +1,218 @@
+openapi: 3.0.3
+info:
+  title: AliasCore Mobile - Events API
+  description: |
+    Events discovery endpoints for AliasCore Mobile MVP.
+    Retrieves local gaming events filtered by domain and location.
+  version: 1.0.0
+
+servers:
+  - url: https://api.aliascore.example.com
+    description: Production API
+  - url: http://localhost:3000
+    description: Local development
+
+paths:
+  /api/events:
+    get:
+      summary: Get local events for a domain
+      description: |
+        Retrieves gaming events filtered by domain and geographic location.
+        Returns max 25 events within specified radius, sorted by soonest event date.
+
+        Clarifications from spec:
+        - Maximum 25 events returned (if more exist, returns 25 soonest upcoming)
+        - Default radius: 20 miles / 30 km
+        - Events are pre-filtered by domain on backend
+      operationId: getEvents
+      tags:
+        - Events
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: domainKey
+          in: query
+          required: true
+          description: Domain key to filter events (e.g., 'chess', 'valorant')
+          schema:
+            type: string
+            pattern: '^[a-z0-9_-]+$'
+          example: "chess"
+
+        - name: lat
+          in: query
+          required: false
+          description: User's latitude (if location permission granted)
+          schema:
+            type: number
+            format: float
+            minimum: -90
+            maximum: 90
+          example: 37.7749
+
+        - name: lon
+          in: query
+          required: false
+          description: User's longitude (if location permission granted)
+          schema:
+            type: number
+            format: float
+            minimum: -180
+            maximum: 180
+          example: -122.4194
+
+        - name: radius
+          in: query
+          required: false
+          description: Search radius in kilometers (default 30 km / 20 miles)
+          schema:
+            type: number
+            format: float
+            minimum: 1
+            maximum: 100
+            default: 30
+          example: 30
+
+      responses:
+        '200':
+          description: Events retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - events
+                  - limit
+                properties:
+                  events:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Event'
+                    maxItems: 25
+                    description: Array of events (max 25, sorted by soonest date)
+                  limit:
+                    type: integer
+                    description: Maximum number of events returned
+                    example: 25
+
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        '401':
+          description: Unauthorized (missing or invalid auth token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Event:
+      type: object
+      required:
+        - id
+        - domainKey
+        - name
+        - description
+        - venue
+        - dateTime
+        - latitude
+        - longitude
+      properties:
+        id:
+          type: string
+          description: Event unique identifier
+          example: "evt_001"
+
+        domainKey:
+          type: string
+          pattern: '^[a-z0-9_-]+$'
+          description: Domain this event belongs to
+          example: "chess"
+
+        name:
+          type: string
+          minLength: 1
+          description: Event name
+          example: "City Chess Championship 2025"
+
+        description:
+          type: string
+          description: Event description
+          example: "Annual city-wide chess tournament for all skill levels. USCF rated."
+
+        venue:
+          type: string
+          minLength: 1
+          description: Venue name and/or address
+          example: "Community Center, 123 Main St, San Francisco, CA"
+
+        dateTime:
+          type: string
+          format: date-time
+          description: Event date and time (ISO 8601)
+          example: "2025-12-20T10:00:00Z"
+
+        latitude:
+          type: number
+          format: float
+          minimum: -90
+          maximum: 90
+          description: Event location latitude
+          example: 37.7749
+
+        longitude:
+          type: number
+          format: float
+          minimum: -180
+          maximum: 180
+          description: Event location longitude
+          example: -122.4194
+
+        link:
+          type: string
+          format: uri
+          nullable: true
+          description: Optional external link for event details/registration
+          example: "https://citychess.example.com/tournament-2025"
+
+        organizerName:
+          type: string
+          nullable: true
+          description: Optional organizer name
+          example: "SF Chess Club"
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              example: "INVALID_DOMAIN"
+            message:
+              type: string
+              example: "Invalid domain key provided"

@@ -1,0 +1,211 @@
+openapi: 3.0.3
+info:
+  title: AliasCore Mobile - Sharing API
+  description: |
+    Public profile sharing endpoints for AliasCore Mobile MVP.
+    Serves public-facing domain profile pages accessed via QR code or NFC.
+  version: 1.0.0
+
+servers:
+  - url: https://aliascore.app
+    description: Public web (unauthenticated)
+  - url: http://localhost:3000
+    description: Local development
+
+paths:
+  /share/{userId}/{domainId}:
+    get:
+      summary: Get public domain profile page
+      description: |
+        Publicly accessible endpoint that returns an HTML page displaying a user's domain profile.
+        This endpoint is accessed when someone scans a QR code or receives an NFC tag.
+
+        **Security Notes**:
+        - No authentication required (public endpoint)
+        - Only displays public profile data (no email, tokens, or private info)
+        - Rate-limited to prevent abuse
+
+        **Spec Requirements**:
+        - Load time target: <3 seconds (SC-007)
+        - Mobile-optimized responsive HTML
+        - Includes "Download AliasCore" CTA button linking to app store
+      operationId: getPublicProfile
+      tags:
+        - Sharing
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: User's unique identifier
+          schema:
+            type: string
+          example: "usr_abc123"
+
+        - name: domainId
+          in: path
+          required: true
+          description: Domain key (e.g., 'chess', 'valorant')
+          schema:
+            type: string
+            pattern: '^[a-z0-9_-]+$'
+          example: "chess"
+
+      responses:
+        '200':
+          description: Public profile page HTML
+          content:
+            text/html:
+              schema:
+                type: string
+                description: Mobile-optimized HTML page with profile data
+                example: |
+                  <!DOCTYPE html>
+                  <html>
+                  <head>
+                    <title>ChessMaster2000 - Chess Profile | AliasCore</title>
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                  </head>
+                  <body>
+                    <!-- Profile content with stats -->
+                    <!-- Download AliasCore CTA -->
+                  </body>
+                  </html>
+
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicProfileData'
+              examples:
+                jsonResponse:
+                  summary: JSON response (optional, for API clients)
+                  value:
+                    user:
+                      displayName: "ChessMaster2000"
+                      avatarUrl: "https://cdn.aliascore.app/avatars/usr_abc123.jpg"
+                    domain:
+                      domainName: "Chess"
+                      domainIcon: "https://cdn.aliascore.app/icons/chess.png"
+                      primaryPlatform: "Chess.com"
+                      platformUsername: "ChessMaster2000"
+                      peakRating: 2400
+                      currentRating: 2350
+                      gamesPlayed: 1234
+                      rankTier: "Expert"
+
+        '404':
+          description: Profile not found or not shared publicly
+          content:
+            text/html:
+              schema:
+                type: string
+                example: |
+                  <!DOCTYPE html>
+                  <html>
+                  <head><title>Profile Not Found</title></head>
+                  <body><h1>Profile not found</h1></body>
+                  </html>
+
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    PublicProfileData:
+      type: object
+      description: Public profile data (no sensitive information)
+      required:
+        - user
+        - domain
+      properties:
+        user:
+          type: object
+          required:
+            - displayName
+          properties:
+            displayName:
+              type: string
+              description: User's public display name
+              example: "ChessMaster2000"
+            avatarUrl:
+              type: string
+              format: uri
+              nullable: true
+              description: URL to user's avatar image
+              example: "https://cdn.aliascore.app/avatars/usr_abc123.jpg"
+
+        domain:
+          type: object
+          required:
+            - domainName
+            - primaryPlatform
+            - platformUsername
+          properties:
+            domainName:
+              type: string
+              description: Domain name (e.g., 'Chess')
+              example: "Chess"
+            domainIcon:
+              type: string
+              format: uri
+              description: Domain icon URL
+              example: "https://cdn.aliascore.app/icons/chess.png"
+            primaryPlatform:
+              type: string
+              description: Platform name
+              example: "Chess.com"
+            platformUsername:
+              type: string
+              description: Username on the platform
+              example: "ChessMaster2000"
+            peakRating:
+              type: number
+              nullable: true
+              description: Peak rating
+              example: 2400
+            currentRating:
+              type: number
+              nullable: true
+              description: Current rating
+              example: 2350
+            gamesPlayed:
+              type: integer
+              nullable: true
+              description: Total games played
+              example: 1234
+            rankTier:
+              type: string
+              nullable: true
+              description: Rank/tier name
+              example: "Expert"
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              example: "RATE_LIMIT_EXCEEDED"
+            message:
+              type: string
+              example: "Too many requests. Please try again later."
+
+tags:
+  - name: Sharing
+    description: Public profile sharing (QR/NFC)

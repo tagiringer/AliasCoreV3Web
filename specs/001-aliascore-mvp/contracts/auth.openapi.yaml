@@ -1,0 +1,237 @@
+openapi: 3.0.3
+info:
+  title: AliasCore Mobile - Authentication API
+  description: |
+    Authentication endpoints for AliasCore Mobile MVP.
+    Handles Google OAuth authentication, user session management, and sign-out.
+  version: 1.0.0
+  contact:
+    name: AliasCore API Team
+
+servers:
+  - url: https://api.aliascore.example.com
+    description: Production API
+  - url: http://localhost:3000
+    description: Local development
+
+paths:
+  /api/auth/google:
+    post:
+      summary: Authenticate with Google OAuth
+      description: |
+        Exchanges a Google ID token for an AliasCore auth token.
+        Creates a new user if this is their first sign-in, or returns existing user.
+      operationId: authenticateWithGoogle
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - idToken
+              properties:
+                idToken:
+                  type: string
+                  description: Google ID token from expo-auth-session
+                  example: "eyJhbGciOiJSUzI1NiIsImtpZCI6..."
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - token
+                  - user
+                  - isNewUser
+                properties:
+                  token:
+                    type: string
+                    description: JWT auth token for subsequent API requests
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  user:
+                    $ref: '#/components/schemas/User'
+                  isNewUser:
+                    type: boolean
+                    description: True if this is the user's first sign-in
+                    example: true
+        '400':
+          description: Invalid request (missing or malformed idToken)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Invalid Google ID token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/me:
+    get:
+      summary: Get current authenticated user
+      description: |
+        Retrieves the profile of the currently authenticated user.
+        Requires valid auth token in Authorization header.
+      operationId: getCurrentUser
+      tags:
+        - Authentication
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User profile retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - user
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          description: Unauthorized (missing or invalid auth token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/signout:
+    post:
+      summary: Sign out current user
+      description: |
+        Invalidates the current auth token on the backend.
+        Mobile app should clear local token storage after calling this endpoint.
+      operationId: signOut
+      tags:
+        - Authentication
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: Empty object (placeholder for future fields)
+      responses:
+        '200':
+          description: Sign-out successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Signed out successfully"
+        '401':
+          description: Unauthorized (missing or invalid auth token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from /api/auth/google endpoint
+
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - email
+        - displayName
+        - avatarUrl
+        - domains
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: User's unique identifier
+          example: "usr_abc123"
+        email:
+          type: string
+          format: email
+          description: User's email from Google OAuth
+          example: "player@example.com"
+        displayName:
+          type: string
+          minLength: 3
+          maxLength: 30
+          pattern: '^[a-zA-Z0-9 .\-'']+$'
+          description: User-chosen display name (3-30 chars, alphanumeric + spaces + . - ')
+          example: "ChessMaster2000"
+        avatarUrl:
+          type: string
+          format: uri
+          nullable: true
+          description: URL to user's avatar image
+          example: "https://cdn.aliascore.app/avatars/usr_abc123.jpg"
+        domains:
+          type: array
+          items:
+            type: string
+          maxItems: 10
+          description: Array of domain profile IDs (max 10 per user)
+          example: ["dom_chess_001", "dom_valorant_002"]
+        createdAt:
+          type: string
+          format: date-time
+          description: Account creation timestamp (ISO 8601)
+          example: "2025-12-11T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last profile update timestamp (ISO 8601)
+          example: "2025-12-11T14:30:00Z"
+
+    Error:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              description: Machine-readable error code
+              example: "INVALID_TOKEN"
+            message:
+              type: string
+              description: Human-readable error message
+              example: "The provided Google ID token is invalid or expired"
